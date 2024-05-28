@@ -3,28 +3,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
 
     const player = {
-        width: 50,
+        width: 100,
         height: 20,
-        x: canvas.width / 2 - 25,
+        x: canvas.width / 2 - 50,
         y: canvas.height - 30,
-        speed: 7,
+        speed: 5,
         dx: 0
     };
 
     const objects = [];
-    const objectWidth = 20;
-    const objectHeight = 20;
-    const objectSpeed = 2;
+    const objectWidth = 30;
+    const objectHeight = 30;
+    const objectSpeed = 1;
     let score = 0;
     let gameOver = false;
 
+    // Load sounds
+    const catchSound = new Audio('catch.mp3');
+    const gameOverSound = new Audio('gameover.mp3');
+
     function drawPlayer() {
-        ctx.fillStyle = 'blue';
+        ctx.fillStyle = '#3498db';
         ctx.fillRect(player.x, player.y, player.width, player.height);
     }
 
     function drawObject(object) {
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = '#e74c3c';
         ctx.fillRect(object.x, object.y, objectWidth, objectHeight);
     }
 
@@ -46,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (objects[i].y + objectHeight > canvas.height) {
                 gameOver = true;
+                gameOverSound.play();
             }
 
             if (
@@ -55,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ) {
                 objects.splice(i, 1);
                 score++;
+                catchSound.play();
                 i--;
             }
         }
@@ -96,6 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = 'black';
             ctx.font = '40px Arial';
             ctx.fillText('Game Over', canvas.width / 2 - 100, canvas.height / 2);
+            ctx.font = '20px Arial';
+            ctx.fillText(`Final Score: ${score}`, canvas.width / 2 - 70, canvas.height / 2 + 40);
         }
     }
 
@@ -110,6 +118,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function stopMove() {
         player.dx = 0;
     }
+
+    // Mouse move event to control the player
+    canvas.addEventListener('mousemove', (e) => {
+        const canvasRect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - canvasRect.left;
+        player.x = mouseX - player.width / 2;
+
+        // Ensure the player stays within the canvas boundaries
+        if (player.x < 0) {
+            player.x = 0;
+        }
+        if (player.x + player.width > canvas.width) {
+            player.x = canvas.width - player.width;
+        }
+    });
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowRight' || e.key === 'Right') {
@@ -128,6 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    setInterval(createObject, 1000);
+    setInterval(createObject, 2000); // Increased the interval to make it easier
     update();
 });
